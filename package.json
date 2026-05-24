@@ -1,12 +1,11 @@
 {
   "name": "ia-roblox",
   "version": "1.0.0",
-  "description": "Roblox AI API",
   "main": "app.js",
   "scripts": {
     "start": "node app.js"
   },
   "dependencies": {
-    "express": "^4.18.2"
+    "express": "^4.21.2"
   }
 }
