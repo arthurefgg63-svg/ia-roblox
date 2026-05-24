@@ -1,7 +1,7 @@
 {
   "name": "ia-roblox",
   "version": "1.0.0",
-  "description": "API Gemini Roblox",
+  "description": "Roblox Gemini AI API",
   "main": "app.js",
   "scripts": {
     "start": "node app.js"
