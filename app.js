@@ -1,60 +1,130 @@
 const express = require("express");
+const { GoogleGenerativeAI } = require("@google/generative-ai");
 
 const app = express();
 
-// Railway usa essa porta automaticamente
+// =========================
+// CONFIG
+// =========================
+
 const PORT = process.env.PORT || 3000;
+const GEMINI_KEY = process.env.GEMINI_KEY;
 
-// Segurança básica
-app.disable("x-powered-by");
+// =========================
+// VALIDAR KEY
+// =========================
 
-// Middleware JSON blindado
-app.use(express.json({ limit: "1mb" }));
+if (!GEMINI_KEY) {
+    console.log("GEMINI_KEY não encontrada");
+    process.exit(1);
+}
 
-// Página inicial
+// =========================
+// GEMINI
+// =========================
+
+const genAI = new GoogleGenerativeAI(GEMINI_KEY);
+
+// =========================
+// MIDDLEWARE
+// =========================
+
+app.use(express.json({
+    limit: "1mb"
+}));
+
+// =========================
+// ROOT
+// =========================
+
 app.get("/", (req, res) => {
-    res.status(200).send("API ONLINE");
+
+    return res.status(200).json({
+        online: true,
+        message: "API ONLINE"
+    });
+
 });
 
-// Endpoint da IA
-app.post("/ia", (req, res) => {
-    try {
-        const message = req.body?.message;
+// =========================
+// IA
+// =========================
 
-        // Blindagem total
+app.post("/ia", async (req, res) => {
+
+    try {
+
+        const body = req.body;
+
+        if (!body) {
+
+            return res.status(400).json({
+                error: "Body inválido"
+            });
+
+        }
+
+        const message = body.message;
+
         if (
             typeof message !== "string" ||
             message.trim() === ""
         ) {
+
             return res.status(400).json({
                 error: "Mensagem inválida"
             });
+
         }
 
-        // Resposta simples
-        const resposta = `Você disse: ${message}`;
+        const cleanMessage = message
+            .trim()
+            .slice(0, 500);
+
+        const model = genAI.getGenerativeModel({
+            model: "gemini-1.5-flash"
+        });
+
+        const result = await model.generateContent(cleanMessage);
+
+        const response = result.response;
+
+        const text = response.text();
 
         return res.status(200).json({
-            reply: resposta
+            reply: text
         });
 
     } catch (err) {
-        console.error(err);
+
+        console.log(err);
 
         return res.status(500).json({
-            error: "Erro interno do servidor"
+            error: "Erro interno"
         });
+
     }
+
 });
 
-// Qualquer rota inexistente
+// =========================
+// 404
+// =========================
+
 app.use((req, res) => {
-    res.status(404).json({
-        error: "Rota não encontrada"
+
+    return res.status(404).json({
+        error: "404"
     });
+
 });
 
-// Inicialização blindada
+// =========================
+// START
+// =========================
+
 app.listen(PORT, "0.0.0.0", () => {
-    console.log(`Servidor rodando na porta ${PORT}`);
+
+    console.log(`Servidor online na porta ${PORT}`);
+
 });
