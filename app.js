@@ -1,130 +1,60 @@
-const express = require("express")
+const express = require("express");
 
-const app = express()
+const app = express();
 
-// =========================
-// CONFIG
-// =========================
+// Railway usa essa porta automaticamente
+const PORT = process.env.PORT || 3000;
 
-const PORT = process.env.PORT || 3000
+// Segurança básica
+app.disable("x-powered-by");
 
-// =========================
-// MIDDLEWARES
-// =========================
+// Middleware JSON blindado
+app.use(express.json({ limit: "1mb" }));
 
-app.disable("x-powered-by")
-
-app.use(express.json({
-	limit: "1mb"
-}))
-
-// =========================
-// LOGGER
-// =========================
-
-app.use((req, res, next) => {
-
-	console.log(
-		`[${new Date().toISOString()}]`,
-		req.method,
-		req.url
-	)
-
-	next()
-})
-
-// =========================
-// ROOT
-// =========================
-
+// Página inicial
 app.get("/", (req, res) => {
+    res.status(200).send("API ONLINE");
+});
 
-	return res.status(200).json({
-		success: true,
-		message: "IA ONLINE"
-	})
-})
+// Endpoint da IA
+app.post("/ia", (req, res) => {
+    try {
+        const message = req.body?.message;
 
-// =========================
-// CHAT ROUTE
-// =========================
+        // Blindagem total
+        if (
+            typeof message !== "string" ||
+            message.trim() === ""
+        ) {
+            return res.status(400).json({
+                error: "Mensagem inválida"
+            });
+        }
 
-app.post("/chat", async (req, res) => {
+        // Resposta simples
+        const resposta = `Você disse: ${message}`;
 
-	try {
+        return res.status(200).json({
+            reply: resposta
+        });
 
-		// body protection
-		if (!req.body) {
+    } catch (err) {
+        console.error(err);
 
-			return res.status(400).json({
-				success: false,
-				error: "Body inválido"
-			})
-		}
+        return res.status(500).json({
+            error: "Erro interno do servidor"
+        });
+    }
+});
 
-		const message = req.body.message
-
-		// validation
-		if (
-			typeof message ~= "string" ||
-			message.trim() === ""
-		) {
-
-			return res.status(400).json({
-				success: false,
-				error: "Mensagem inválida"
-			})
-		}
-
-		// anti spam size
-		if (message.length > 200) {
-
-			return res.status(400).json({
-				success: false,
-				error: "Mensagem muito grande"
-			})
-		}
-
-		// sanitize
-		const cleanMessage = message
-			.trim()
-			.replace(/[<>]/g, "")
-
-		// response
-		return res.status(200).json({
-			success: true,
-			reply: "IA: " + cleanMessage
-		})
-
-	} catch (err) {
-
-		console.log(err)
-
-		return res.status(500).json({
-			success: false,
-			error: "Erro interno"
-		})
-	}
-})
-
-// =========================
-// 404 HANDLER
-// =========================
-
+// Qualquer rota inexistente
 app.use((req, res) => {
+    res.status(404).json({
+        error: "Rota não encontrada"
+    });
+});
 
-	return res.status(404).json({
-		success: false,
-		error: "Rota não encontrada",
-		route: req.url
-	})
-})
-
-// =========================
-// START
-// =========================
-
+// Inicialização blindada
 app.listen(PORT, "0.0.0.0", () => {
-
-	console.log(`Servidor online na porta ${PORT}`)
-})
+    console.log(`Servidor rodando na porta ${PORT}`);
+});
