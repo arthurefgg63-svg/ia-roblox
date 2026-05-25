@@ -1,16 +1,21 @@
 {
-  "name": "ia-roblox",
-  "version": "1.0.0",
-  "description": "Roblox Gemini AI API",
-  "main": "app.js",
+  "name": "roblox-discord-radio-ultimate",
+  "version": "3.0.0",
+  "description": "API de Rádio Individual e Blindada de Nível Militar para Roblox",
+  "main": "index.js",
   "scripts": {
-    "start": "node app.js"
+    "start": "node index.js"
   },
   "dependencies": {
-    "@google/generative-ai": "^0.24.1",
-    "compression": "^1.8.0",
-    "express": "^4.21.2",
-    "express-rate-limit": "^7.5.0",
-    "helmet": "^8.1.0"
+    "express": "4.19.2",
+    "helmet": "7.1.0",
+    "express-rate-limit": "7.2.0",
+    "discord.js": "14.14.1",
+    "@discordjs/voice": "0.16.0",
+    "play-dl": "1.9.7",
+    "libsodium-wrappers": "0.7.13"
+  },
+  "engines": {
+    "node": ">=20.0.0"
   }
 }
